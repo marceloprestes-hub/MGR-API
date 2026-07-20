@@ -1,48 +1,31 @@
-export async function listarLeads(env) {
-    const resultado = await env.DB.prepare(
-        "SELECT * FROM leads ORDER BY criado_em DESC"
-    ).all();
+export async function cadastrarLead(env, lead) {
 
-    return resultado.results;
-}
+    const resultado = await env.DB.prepare(`
+        INSERT INTO leads (
+            nome,
+            empresa,
+            email,
+            telefone,
+            cidade,
+            origem,
+            status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    `)
+    .bind(
+        lead.nome,
+        lead.empresa,
+        lead.email,
+        lead.telefone,
+        lead.cidade,
+        lead.origem,
+        lead.status
+    )
+    .run();
 
-export async function buscarLead(id, env) {
-    return await env.DB.prepare(
-        "SELECT * FROM leads WHERE id=?"
-    ).bind(id).first();
-}
+    return {
+        id: resultado.meta.last_row_id,
+        mensagem: "Lead cadastrado com sucesso."
+    };
 
-export async function cadastrarLead(dados, env) {
-    return await env.DB.prepare(
-        `INSERT INTO leads
-        (nome,email,telefone,empresa,origem)
-        VALUES (?,?,?,?,?)`
-    ).bind(
-        dados.nome,
-        dados.email,
-        dados.telefone,
-        dados.empresa,
-        dados.origem
-    ).run();
-}
-
-export async function atualizarLead(id,dados,env){
-    return await env.DB.prepare(
-        `UPDATE leads
-        SET nome=?,email=?,telefone=?,empresa=?,origem=?
-        WHERE id=?`
-    ).bind(
-        dados.nome,
-        dados.email,
-        dados.telefone,
-        dados.empresa,
-        dados.origem,
-        id
-    ).run();
-}
-
-export async function excluirLead(id,env){
-    return await env.DB.prepare(
-        "DELETE FROM leads WHERE id=?"
-    ).bind(id).run();
 }
