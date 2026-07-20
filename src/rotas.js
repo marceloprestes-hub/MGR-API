@@ -1,44 +1,21 @@
-import { sucesso, erro } from "./retorno.js";
+if (pathname === "/lead" && request.method === "POST") {
 
-import {
-    listarLeads,
-    buscarLead,
-    cadastrarLead,
-    atualizarLead,
-    excluirLead
-} from "./banco.js";
+    const dados = await request.json();
 
-export async function processarRotas(request, env) {
-
-    const url = new URL(request.url);
-    const rota = url.pathname;
-    const metodo = request.method;
-
-    if (rota === "/saude") {
-        return sucesso({
-            sistema: "MGR API",
-            versao: "1.0.0",
-            status: "ONLINE"
-        });
+    if (!dados.nome || !dados.email) {
+        return erro("Nome e e-mail são obrigatórios.", 400);
     }
 
-    if (rota === "/leads" && metodo === "GET") {
-        const leads = await listarLeads(env);
-        return sucesso(leads);
-    }
+    const resultado = await cadastrarLead(env, {
+        nome: dados.nome,
+        empresa: dados.empresa || "",
+        email: dados.email,
+        telefone: dados.telefone || "",
+        cidade: dados.cidade || "",
+        origem: dados.origem || "Landing Page",
+        status: "NOVO"
+    });
 
-    if (rota === "/lead" && metodo === "POST") {
-
-        const dados = await request.json();
-
-        await cadastrarLead(dados, env);
-
-        return sucesso({
-            mensagem: "Lead cadastrado com sucesso."
-        },201);
-
-    }
-
-    return erro("Rota não encontrada.",404);
+    return sucesso(resultado, 201);
 
 }
