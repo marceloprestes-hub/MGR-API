@@ -1,41 +1,39 @@
+import { processarRotas } from "./src/rotas.js";
+
 export default {
-  async fetch(request, env) {
 
-    const url = new URL(request.url);
+    async fetch(request, env) {
 
-    const headers = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
-    };
+        try {
 
-    if (request.method === "OPTIONS") {
-      return new Response(null, {
-        status: 204,
-        headers
-      });
+            const resposta = await processarRotas(request, env);
+
+            return new Response(
+                JSON.stringify(resposta, null, 2),
+                {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+        } catch (erro) {
+
+            return new Response(
+                JSON.stringify({
+                    sucesso: false,
+                    erro: erro.message
+                }),
+                {
+                    status: 500,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+        }
+
     }
 
-    if (url.pathname === "/health") {
-
-      return Response.json({
-        success: true,
-        application: "MGR API",
-        version: "1.0.0",
-        status: "ONLINE"
-      }, {
-        headers
-      });
-
-    }
-
-    return Response.json({
-      success: false,
-      message: "Endpoint não encontrado."
-    }, {
-      status: 404,
-      headers
-    });
-
-  }
-};
+}
