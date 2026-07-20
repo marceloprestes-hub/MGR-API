@@ -1,24 +1,67 @@
-export function validarLead(data) {
+// ========================================
+// VALIDAÇÕES MGR API
+// ========================================
 
-  if (!data.nome || data.nome.trim() === "") {
-    return "Nome obrigatório";
-  }
+export function validarLead(dados) {
 
-  if (!data.email || data.email.trim() === "") {
-    return "E-mail obrigatório";
-  }
+    const erros = [];
 
-  const emailRegex =
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!dados) {
+        erros.push("Nenhum dado informado.");
+        return erros;
+    }
 
-  if (!emailRegex.test(data.email)) {
-    return "E-mail inválido";
-  }
+    // Nome
+    if (!dados.nome || dados.nome.trim().length < 3) {
+        erros.push("Nome deve possuir pelo menos 3 caracteres.");
+    }
 
-  if (!data.whatsapp || data.whatsapp.trim() === "") {
-    return "WhatsApp obrigatório";
-  }
+    // Email
+    if (!dados.email || dados.email.trim() === "") {
 
-  return null;
+        erros.push("E-mail é obrigatório.");
+
+    } else {
+
+        const regex =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!regex.test(dados.email)) {
+            erros.push("E-mail inválido.");
+        }
+
+    }
+
+    // Telefone
+    if (!dados.telefone || dados.telefone.trim() === "") {
+        erros.push("Telefone é obrigatório.");
+    }
+
+    // Empresa
+    if (!dados.empresa || dados.empresa.trim() === "") {
+        erros.push("Empresa é obrigatória.");
+    }
+
+    return erros;
+
+}
+
+export function validarId(id) {
+
+    if (id === undefined || id === null) {
+        return false;
+    }
+
+    const numero = Number(id);
+
+    if (Number.isNaN(numero)) {
+        return false;
+    }
+
+    if (numero <= 0) {
+        return false;
+    }
+
+    return true;
 
 }
