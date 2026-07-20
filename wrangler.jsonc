@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "mgr-api",
+  "main": "worker.js",
+  "compatibility_date": "2026-07-20",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mgr-leads",
+      "database_id": "f7481f8e-4013-4fe0-98e8-d018673e47f6"
+    }
+  ]
+}
