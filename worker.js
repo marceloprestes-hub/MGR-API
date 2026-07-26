@@ -28,7 +28,7 @@ async function router(request, env) {
   const routes = [
    {
     method: "GET",
-    pattern: /^\/health$/,
+    pattern: /^\/health$/,f
     handler: health,
 },
 
@@ -42,12 +42,7 @@ async function router(request, env) {
       pattern: /^\/$/,
       handler: home,
     },
-    {
-      method: "GET",
-      pattern: /^\/health$/,
-      handler: health,
-    },
-
+    
     // CLIENTES
     {
       method: "GET",
