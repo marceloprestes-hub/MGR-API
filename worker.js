@@ -26,6 +26,17 @@ async function router(request, env) {
   }
 
   const routes = [
+   {
+    method: "GET",
+    pattern: /^\/health$/,
+    handler: health,
+},
+
+{
+    method: "GET",
+    pattern: /^\/db-test$/,
+    handler: dbTest,
+},
     {
       method: "GET",
       pattern: /^\/$/,
