@@ -230,3 +230,21 @@ async function execute(callback) {
     }
 
 }
+async function dbTest(request, env) {
+
+    return execute(async () => {
+
+        const resultado = await env.DB
+            .prepare("SELECT datetime('now') AS agora")
+            .first();
+
+        return ok({
+            api: "MGR API",
+            database: "Cloudflare D1",
+            connected: true,
+            serverTime: resultado.agora
+        });
+
+    });
+
+}
