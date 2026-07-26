@@ -160,3 +160,62 @@ async function notImplemented(request, env) {
     headers: CORS_HEADERS,
   });
 }
+// ======================================================
+// UTILITÁRIOS MGR API
+// ======================================================
+
+function json(data, status = 200) {
+    return new Response(
+        JSON.stringify(data, null, 2),
+        {
+            status,
+            headers: {
+                ...CORS_HEADERS,
+                "Content-Type": "application/json"
+            }
+        }
+    );
+}
+
+async function readBody(request) {
+    try {
+        return await request.json();
+    } catch {
+        return {};
+    }
+}
+
+function ok(data = {}, message = "OK") {
+    return json({
+        success: true,
+        message,
+        data
+    });
+}
+
+function error(message = "Erro", status = 400) {
+    return json({
+        success: false,
+        message
+    }, status);
+}
+
+async function execute(callback) {
+
+    try {
+
+        return await callback();
+
+    } catch (err) {
+
+        console.error(err);
+
+        return json({
+            success: false,
+            message: "Erro interno.",
+            error: err.message
+        }, 500);
+
+    }
+
+}
