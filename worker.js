@@ -482,7 +482,62 @@ async function createConsultoria(request, env) {
     });
 
 }
+async function createConsultoria(request, env) {
 
+    return execute(async () => {
+
+        const body = await readBody(request);
+
+        const ultimo = await env.DB.prepare(`
+            SELECT MAX(numero_consultoria) numero
+            FROM consultorias
+        `).first();
+
+        const numeroConsultoria =
+            (ultimo?.numero || 1000) + 1;
+
+        const uuid = crypto.randomUUID();
+
+        const result = await env.DB.prepare(`
+            INSERT INTO consultorias
+            (
+                uuid,
+                cliente_id,
+                numero_consultoria,
+                data_consultoria,
+                tipo,
+                duracao,
+                consultor,
+                status,
+                observacoes
+            )
+            VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `)
+        .bind(
+            uuid,
+            body.cliente_id,
+            numeroConsultoria,
+            body.data_consultoria || new Date().toISOString(),
+            body.tipo || "Diagnóstico MGR",
+            body.duracao || 60,
+            body.consultor || "Marcelo Prestes",
+            body.status || "Em andamento",
+            body.observacoes || ""
+        )
+        .run();
+
+        return ok(
+            {
+                id: result.meta.last_row_id,
+                numero_consultoria: numeroConsultoria
+            },
+            "Consultoria cadastrada com sucesso"
+        );
+
+    });
+
+}
 async function listarConsultorias(request, env) {
 
     return execute(async () => {
