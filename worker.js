@@ -57,7 +57,7 @@ async function router(request, env) {
     {
       method: "POST",
       pattern: /^\/clientes$/,
-      handler: notImplemented,
+     handler: createCliente,
     },
     {
       method: "PUT",
@@ -274,6 +274,36 @@ async function dbTest(request, env) {
             connected: true,
             serverTime: resultado.agora
         });
+
+    });
+
+}
+async function createCliente(request, env) {
+
+    return execute(async () => {
+
+        const body = await readBody(request);
+
+        const result = await env.DB.prepare(`
+            INSERT INTO clientes
+            (
+                nome,
+                email,
+                telefone
+            )
+            VALUES
+            (?, ?, ?)
+        `)
+        .bind(
+            body.nome || "",
+            body.email || "",
+            body.telefone || ""
+        )
+        .run();
+
+        return ok({
+            id: result.meta.last_row_id
+        }, "Cliente cadastrado com sucesso");
 
     });
 
