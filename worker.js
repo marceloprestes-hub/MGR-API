@@ -76,16 +76,21 @@ async function router(request, env) {
     },
 
     // CONSULTORIAS
-    {
-      method: "GET",
-      pattern: /^\/consultorias$/,
-      handler: notImplemented,
-    },
-    {
-      method: "POST",
-      pattern: /^\/consultorias$/,
-      handler: notImplemented,
-    },
+{
+  method: "GET",
+  pattern: /^\/consultorias$/,
+  handler: listarConsultorias,
+},
+{
+  method: "GET",
+  pattern: /^\/consultorias\/(\d+)$/,
+  handler: buscarConsultoria,
+},
+{
+  method: "POST",
+  pattern: /^\/consultorias$/,
+  handler: createConsultoria,
+},
 
     // DIAGNÓSTICOS
     {
@@ -417,6 +422,106 @@ async function listarClientes(request, env) {
             .all();
 
         return ok(results);
+
+    });
+
+}
+// ======================================================
+// CONSULTORIAS
+// ======================================================
+
+async function createConsultoria(request, env) {
+
+    return execute(async () => {
+
+        const body = await readBody(request);
+
+        const ultimo = await env.DB.prepare(`
+            SELECT MAX(numero_consultoria) numero
+            FROM consultorias
+        `).first();
+
+        const numeroConsultoria = (ultimo?.numero || 1000) + 1;
+
+        const uuid = crypto.randomUUID();
+
+        const result = await env.DB.prepare(`
+            INSERT INTO consultorias
+            (
+                uuid,
+                cliente_id,
+                numero_consultoria,
+                data_consultoria,
+                tipo,
+                duracao,
+                consultor,
+                status,
+                observacoes
+            )
+            VALUES
+            (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `)
+        .bind(
+            uuid,
+            body.cliente_id,
+            numeroConsultoria,
+            body.data_consultoria || new Date().toISOString(),
+            body.tipo || "Diagnóstico MGR",
+            body.duracao || 60,
+            body.consultor || "Marcelo Prestes",
+            body.status || "Em andamento",
+            body.observacoes || ""
+        )
+        .run();
+
+        return ok({
+            id: result.meta.last_row_id,
+            numero_consultoria: numeroConsultoria
+        }, "Consultoria cadastrada com sucesso");
+
+    });
+
+}
+
+async function listarConsultorias(request, env) {
+
+    return execute(async () => {
+
+        const { results } = await env.DB.prepare(`
+            SELECT
+                c.id,
+                c.numero_consultoria,
+                c.data_consultoria,
+                c.tipo,
+                c.status,
+                cli.nome
+            FROM consultorias c
+            INNER JOIN clientes cli
+                ON cli.id = c.cliente_id
+            ORDER BY c.numero_consultoria DESC
+        `).all();
+
+        return ok(results);
+
+    });
+
+}
+
+async function buscarConsultoria(request, env) {
+
+    return execute(async () => {
+
+        const id = request.params[0];
+
+        const resultado = await env.DB.prepare(`
+            SELECT *
+            FROM consultorias
+            WHERE id = ?
+        `)
+        .bind(id)
+        .first();
+
+        return ok(resultado);
 
     });
 
