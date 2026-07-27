@@ -36,7 +36,11 @@ async function router(request, env) {
     pattern: /^\/teste$/,
     handler: teste,
 },
-
+{
+    method: "GET",
+    pattern: /^\/teste-consultoria$/,
+    handler: testeConsultoria,
+},
 {
     method: "GET",
     pattern: /^\/db-test$/,
@@ -527,5 +531,109 @@ async function buscarConsultoria(request, env) {
         return ok(resultado);
 
     });
+
+}
+async function testeConsultoria(request, env) {
+
+return new Response(`
+
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Teste Consultoria</title>
+
+<style>
+
+body{
+font-family:Arial;
+max-width:700px;
+margin:40px auto;
+}
+
+input,textarea{
+display:block;
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+button{
+padding:12px 20px;
+cursor:pointer;
+}
+
+pre{
+background:#eee;
+padding:15px;
+margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Nova Consultoria</h2>
+
+<input id="cliente_id" placeholder="ID do Cliente">
+
+<input id="tipo" placeholder="Tipo da Consultoria">
+
+<textarea id="observacoes" placeholder="Observações"></textarea>
+
+<button onclick="salvar()">Salvar Consultoria</button>
+
+<pre id="resultado"></pre>
+
+<script>
+
+async function salvar(){
+
+const resposta = await fetch("/consultorias",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+cliente_id:Number(document.getElementById("cliente_id").value),
+
+tipo:document.getElementById("tipo").value,
+
+observacoes:document.getElementById("observacoes").value
+
+})
+
+});
+
+const json = await resposta.json();
+
+document.getElementById("resultado").textContent =
+JSON.stringify(json,null,2);
+
+}
+
+</script>
+
+</body>
+
+</html>
+
+`,{
+
+headers:{
+"Content-Type":"text/html"
+}
+
+});
 
 }
