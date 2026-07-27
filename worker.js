@@ -225,6 +225,41 @@ async function execute(callback) {
     }
 
 }
+async function home(request, env) {
+  return ok({
+    api: "MGR API",
+    version: "2.0",
+    status: "online"
+  });
+}
+
+async function health(request, env) {
+  return execute(async () => {
+    let database = false;
+
+    try {
+      await env.DB
+        .prepare("SELECT 1 AS teste")
+        .first();
+
+      database = true;
+    } catch (err) {
+      console.error("Falha na conexão com o D1:", err);
+    }
+
+    return ok({
+      api: "MGR API",
+      version: "2.0",
+      status: "online",
+      database
+    });
+  });
+}
+
+async function notImplemented(request, env) {
+  return error("Rota ainda não implementada.", 501);
+}
+
 async function dbTest(request, env) {
 
     return execute(async () => {
