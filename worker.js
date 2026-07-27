@@ -392,3 +392,6 @@ headers:{
 });
 
 }
+async function notImplemented(request, env) {
+    return error("Rota ainda não implementada.", 501);
+}
