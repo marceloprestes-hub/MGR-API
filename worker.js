@@ -410,7 +410,7 @@ async function listarClientes(request, env) {
                     uuid,
                     nome,
                     email,
-                    telefone,
+                    telefone
                     FROM clientes
                 ORDER BY id DESC
             `)
