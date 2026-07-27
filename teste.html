@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MGR API - Testes</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f4f6f9;
+    padding:40px;
+}
+
+.card{
+    max-width:500px;
+    margin:auto;
+    background:#fff;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    margin-bottom:15px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    background:#0057ff;
+    color:#fff;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+}
+
+pre{
+    background:#111;
+    color:#00ff88;
+    padding:15px;
+    margin-top:20px;
+    overflow:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<h2>MGR API</h2>
+
+<input id="nome" placeholder="Nome">
+
+<input id="email" placeholder="Email">
+
+<input id="telefone" placeholder="Telefone">
+
+<button onclick="cadastrar()">
+
+Cadastrar Cliente
+
+</button>
+
+<pre id="resultado"></pre>
+
+</div>
+
+<script>
+
+async function cadastrar(){
+
+const resposta = await fetch("/clientes",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+nome:document.getElementById("nome").value,
+
+email:document.getElementById("email").value,
+
+telefone:document.getElementById("telefone").value
+
+})
+
+});
+
+const json = await resposta.json();
+
+document.getElementById("resultado").textContent=
+JSON.stringify(json,null,4);
+
+}
+
+</script>
+
+</body>
+</html>
