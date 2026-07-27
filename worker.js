@@ -411,8 +411,7 @@ async function listarClientes(request, env) {
                     nome,
                     email,
                     telefone,
-                    criado_em
-                FROM clientes
+                    FROM clientes
                 ORDER BY id DESC
             `)
             .all();
