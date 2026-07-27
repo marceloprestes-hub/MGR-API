@@ -28,8 +28,13 @@ async function router(request, env) {
   const routes = [
    {
     method: "GET",
-    pattern: /^\/health$/,f
+    pattern: /^\/health$/,
     handler: health,
+},
+    {
+    method: "GET",
+    pattern: /^\/teste$/,
+    handler: teste,
 },
 
 {
@@ -306,5 +311,108 @@ async function createCliente(request, env) {
         }, "Cliente cadastrado com sucesso");
 
     });
+
+}
+async function teste(request, env) {
+
+return new Response(`
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Teste API</title>
+
+<style>
+
+body{
+font-family:Arial;
+max-width:700px;
+margin:40px auto;
+}
+
+input{
+display:block;
+width:100%;
+padding:10px;
+margin:10px 0;
+}
+
+button{
+padding:12px 20px;
+cursor:pointer;
+}
+
+pre{
+background:#eee;
+padding:15px;
+margin-top:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Teste Cadastro Cliente</h2>
+
+<input id="nome" placeholder="Nome">
+
+<input id="email" placeholder="Email">
+
+<input id="telefone" placeholder="Telefone">
+
+<button onclick="salvar()">Salvar</button>
+
+<pre id="resultado"></pre>
+
+<script>
+
+async function salvar(){
+
+const resposta = await fetch("/clientes",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+nome:document.getElementById("nome").value,
+
+email:document.getElementById("email").value,
+
+telefone:document.getElementById("telefone").value
+
+})
+
+});
+
+const json = await resposta.json();
+
+document.getElementById("resultado").textContent =
+JSON.stringify(json,null,2);
+
+}
+
+</script>
+
+</body>
+
+</html>
+
+`,{
+
+headers:{
+"Content-Type":"text/html"
+}
+
+});
 
 }
