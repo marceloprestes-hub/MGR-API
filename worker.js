@@ -239,11 +239,7 @@ async function health(request, env) {
       database
     });
   });
-}
 
-async function notImplemented(request, env) {
-  return error("Rota ainda não implementada.", 501);
-}
 
 async function dbTest(request, env) {
 
