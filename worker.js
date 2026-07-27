@@ -49,11 +49,11 @@ async function router(request, env) {
     },
     
     // CLIENTES
-    {
-      method: "GET",
-      pattern: /^\/clientes$/,
-      handler: notImplemented,
-    },
+   {
+    method: "GET",
+    pattern: /^\/clientes$/,
+    handler: listarClientes,
+},
     {
       method: "GET",
       pattern: /^\/clientes\/(\d+)$/,
@@ -398,4 +398,27 @@ headers:{
 }
 async function notImplemented(request, env) {
     return error("Rota ainda não implementada.", 501);
+}
+async function listarClientes(request, env) {
+
+    return execute(async () => {
+
+        const { results } = await env.DB
+            .prepare(`
+                SELECT
+                    id,
+                    uuid,
+                    nome,
+                    email,
+                    telefone,
+                    criado_em
+                FROM clientes
+                ORDER BY id DESC
+            `)
+            .all();
+
+        return ok(results);
+
+    });
+
 }
