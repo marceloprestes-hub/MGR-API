@@ -151,26 +151,6 @@ function normalizePath(path) {
   return path;
 }
 
-async function home(request, env) {
-  return new Response("MGR API", {
-    status: 200,
-    headers: CORS_HEADERS,
-  });
-}
-
-async function health(request, env) {
-  return new Response("ONLINE", {
-    status: 200,
-    headers: CORS_HEADERS,
-  });
-}
-
-async function notImplemented(request, env) {
-  return new Response("Not Implemented", {
-    status: 501,
-    headers: CORS_HEADERS,
-  });
-}
 // ======================================================
 // UTILITÁRIOS MGR API
 // ======================================================
