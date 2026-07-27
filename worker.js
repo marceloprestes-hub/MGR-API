@@ -239,7 +239,7 @@ async function health(request, env) {
       database
     });
   });
-
+}
 
 async function dbTest(request, env) {
 
