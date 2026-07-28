@@ -1295,3 +1295,96 @@ async function buscarDiagnosticoConsolidado(request, env) {
     });
 
 }
+async function salvarRespostasDiagnostico(request, env) {
+
+    return execute(async () => {
+
+        const diagnosticoId = request.params[0];
+        const body = await request.json();
+
+        if (!Array.isArray(body.respostas) || body.respostas.length === 0) {
+            return error("Nenhuma resposta informada.", 400);
+        }
+
+        const diagnostico = await env.DB.prepare(
+            `SELECT id FROM diagnosticos WHERE id = ?`
+        )
+        .bind(diagnosticoId)
+        .first();
+
+        if (!diagnostico) {
+            return error("Diagnóstico não encontrado.", 404);
+        }
+
+        await env.DB.prepare(
+            `DELETE FROM diagnostico_respostas WHERE diagnostico_id = ?`
+        )
+        .bind(diagnosticoId)
+        .run();
+
+        for (const item of body.respostas) {
+
+            if (
+                item.pergunta_id === undefined ||
+                item.resposta === undefined
+            ) {
+                return error("Resposta inválida.", 400);
+            }
+
+            const uuid = crypto.randomUUID();
+
+            await env.DB.prepare(`
+                INSERT INTO diagnostico_respostas
+                (
+                    uuid,
+                    diagnostico_id,
+                    pergunta_id,
+                    resposta
+                )
+                VALUES (?, ?, ?, ?)
+            `)
+            .bind(
+                uuid,
+                diagnosticoId,
+                item.pergunta_id,
+                item.resposta
+            )
+            .run();
+        }
+
+        return ok({
+            diagnostico_id: Number(diagnosticoId),
+            total_respostas: body.respostas.length
+        });
+
+    });
+
+}
+
+
+async function listarRespostasDiagnostico(request, env) {
+
+    return execute(async () => {
+
+        const diagnosticoId = request.params[0];
+
+        const { results } = await env.DB.prepare(`
+            SELECT
+                id,
+                uuid,
+                diagnostico_id,
+                pergunta_id,
+                resposta,
+                created_at
+            FROM diagnostico_respostas
+            WHERE diagnostico_id = ?
+            ORDER BY pergunta_id ASC
+        `)
+        .bind(diagnosticoId)
+        .all();
+
+        return ok(results);
+
+    });
+
+}
