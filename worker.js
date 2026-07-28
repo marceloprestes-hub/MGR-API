@@ -113,6 +113,11 @@ async function router(request, env) {
     pattern: /^\/clientes\/(\d+)\/diagnosticos$/,
     handler: listarDiagnosticosCliente,
 },
+    {
+    method: "GET",
+    pattern: /^\/diagnosticos\/(\d+)\/consolidado$/,
+    handler: buscarDiagnosticoConsolidado,
+},
 {
     method: "POST",
     pattern: /^\/diagnosticos$/,
@@ -1229,6 +1234,58 @@ async function listarDiagnosticosCliente(request, env) {
         .all();
 
         return ok(results);
+
+    });
+
+}
+async function buscarDiagnosticoConsolidado(request, env) {
+
+    return execute(async () => {
+
+        const diagnosticoId = request.params[0];
+
+        const diagnostico = await env.DB.prepare(`
+            SELECT
+                d.id,
+                d.uuid,
+                d.cliente_id,
+                d.consultoria_id,
+                d.score_geral,
+                d.score_renda,
+                d.score_reserva,
+                d.score_patrimonio,
+                d.score_familia,
+                d.score_empresa,
+                d.perfil_financeiro,
+                d.indice_equilibrio,
+                d.fortaleza,
+                d.vulnerabilidade,
+                d.grau_urgencia,
+                d.parecer,
+                d.created_at,
+
+                c.nome AS cliente_nome,
+
+                co.numero_consultoria
+
+            FROM diagnosticos d
+
+            INNER JOIN clientes c
+                ON c.id = d.cliente_id
+
+            INNER JOIN consultorias co
+                ON co.id = d.consultoria_id
+
+            WHERE d.id = ?
+        `)
+        .bind(diagnosticoId)
+        .first();
+
+        if (!diagnostico) {
+            return error("Diagnóstico não encontrado.", 404);
+        }
+
+        return ok(diagnostico);
 
     });
 
