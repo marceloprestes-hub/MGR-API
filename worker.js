@@ -56,7 +56,7 @@ async function router(request, env) {
     {
       method: "GET",
       pattern: /^\/teste-respostas$/,
-      handler: testeRespostas,
+      handler: testeSalvarRespostas,
     },
     
     // CLIENTES
