@@ -97,16 +97,21 @@ async function router(request, env) {
 },
 
     // DIAGNÓSTICOS
-    {
-      method: "GET",
-      pattern: /^\/diagnosticos$/,
-      handler: notImplemented,
-    },
-    {
-      method: "POST",
-      pattern: /^\/diagnosticos$/,
-      handler: notImplemented,
-    },
+{
+    method: "GET",
+    pattern: /^\/diagnosticos$/,
+    handler: listarDiagnosticos,
+},
+{
+    method: "GET",
+    pattern: /^\/diagnosticos\/(\d+)$/,
+    handler: buscarDiagnostico,
+},
+{
+    method: "POST",
+    pattern: /^\/diagnosticos$/,
+    handler: createDiagnostico,
+},
 
     // RESPOSTAS
     {
@@ -635,5 +640,85 @@ headers:{
 }
 
 });
+
+}
+// ======================================================
+// DIAGNÓSTICOS
+// ======================================================
+
+async function createDiagnostico(request, env) {
+
+    return execute(async () => {
+
+        const body = await readBody(request);
+
+        const uuid = crypto.randomUUID();
+
+        const result = await env.DB.prepare(`
+            INSERT INTO diagnosticos
+            (
+                uuid,
+                consultoria_id,
+                status
+            )
+            VALUES
+            (?, ?, ?)
+        `)
+        .bind(
+            uuid,
+            body.consultoria_id,
+            body.status || "Em andamento"
+        )
+        .run();
+
+        return ok({
+            id: result.meta.last_row_id
+        }, "Diagnóstico criado com sucesso");
+
+    });
+
+}
+
+async function listarDiagnosticos(request, env){
+
+    return execute(async()=>{
+
+        const { results } = await env.DB.prepare(`
+
+            SELECT *
+
+            FROM diagnosticos
+
+            ORDER BY id DESC
+
+        `).all();
+
+        return ok(results);
+
+    });
+
+}
+
+async function buscarDiagnostico(request, env){
+
+    return execute(async()=>{
+
+        const id=request.params[0];
+
+        const resultado=await env.DB.prepare(`
+
+            SELECT *
+
+            FROM diagnosticos
+
+            WHERE id=?
+
+        `)
+        .bind(id)
+        .first();
+
+        return ok(resultado);
+
+    });
 
 }
