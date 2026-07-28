@@ -301,13 +301,19 @@ btnAtendimento.addEventListener("click", async () => {
         data.message || "Erro ao iniciar atendimento."
       );
     }
+mostrarResultado(data, true);
 
-    mostrarResultado(data, true);
-    
-    btnDiagnostico.disabled = false;
-    
-  } catch (erro) {
+// Guarda a consultoria criada
+if (data.data && data.data.consultoria) {
+    consultoriaId = data.data.consultoria.id;
+}
 
+// Habilita o botão 3
+btnDiagnostico.disabled = false;
+btnDiagnostico.removeAttribute("disabled");
+
+} catch (erro) {
+   
     mostrarResultado({
       success: false,
       message: erro.message
