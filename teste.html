@@ -3,41 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MGR API - Teste Lead</title>
+
+  <title>MGR API - Teste 2.4.3</title>
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
+      margin: 0;
+      padding: 40px 20px;
       font-family: Arial, sans-serif;
       background: #f4f6f9;
-      padding: 40px;
+      color: #111827;
     }
 
     .card {
-      max-width: 500px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.1);
+      max-width: 620px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+    }
+
+    h1 {
+      margin-top: 0;
+      font-size: 22px;
+    }
+
+    .subtitulo {
+      color: #667085;
+      margin-bottom: 25px;
     }
 
     input {
       width: 100%;
-      box-sizing: border-box;
-      padding: 12px;
-      margin: 8px 0;
+      padding: 15px;
+      margin-bottom: 14px;
+      border: 1px solid #c7cbd1;
+      border-radius: 6px;
+      font-size: 16px;
     }
 
     button {
       width: 100%;
-      padding: 14px;
-      margin-top: 15px;
+      padding: 16px;
+      margin-top: 5px;
+      border: 0;
+      border-radius: 6px;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    #resultado {
-      margin-top: 20px;
+    #btnCriar {
+      background: #111827;
+      color: white;
+    }
+
+    #btnAtendimento {
+      background: #1769e0;
+      color: white;
+      margin-top: 15px;
+      display: none;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .status {
+      margin-top: 25px;
+      padding: 18px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .sucesso {
+      border-left: 5px solid #16a34a;
+    }
+
+    .erro {
+      border-left: 5px solid #dc2626;
+    }
+
+    pre {
       white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+
+    .lead-info {
+      margin-top: 18px;
+      padding: 15px;
+      background: #eef6ff;
+      border-radius: 8px;
+      display: none;
     }
   </style>
 </head>
@@ -46,63 +112,211 @@
 
   <div class="card">
 
-    <h2>MGR API</h2>
-    <p>Teste real de criação de Lead — 2.4.2</p>
+    <h1>Teste MGR — 2.4.3</h1>
 
-    <input id="nome" placeholder="Nome">
-    <input id="email" type="email" placeholder="E-mail">
-    <input id="whatsapp" placeholder="WhatsApp">
+    <div class="subtitulo">
+      Lead → Cliente → Consultoria
+    </div>
 
-    <button onclick="criarLead()">
-      Criar Lead Teste
+    <input
+      id="nome"
+      type="text"
+      placeholder="Nome"
+    >
+
+    <input
+      id="email"
+      type="email"
+      placeholder="E-mail"
+    >
+
+    <input
+      id="whatsapp"
+      type="text"
+      placeholder="WhatsApp"
+    >
+
+    <button id="btnCriar">
+      1. Criar Lead
     </button>
 
-    <div id="resultado"></div>
+    <div id="leadInfo" class="lead-info"></div>
+
+    <button id="btnAtendimento">
+      2. Iniciar Atendimento
+    </button>
+
+    <div id="status" class="status">
+      <pre id="resultado"></pre>
+    </div>
 
   </div>
 
-  <script>
-    const API = "https://mgr-api.marceloprestes-economista.workers.dev";
 
-    async function criarLead() {
+<script>
 
-      const resultado = document.getElementById("resultado");
+const API = "https://mgr-api.marceloprestes-economista.workers.dev";
 
-      const lead = {
-        nome: document.getElementById("nome").value,
-        email: document.getElementById("email").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        origem: "Teste MGR CRM",
-        campanha: "Teste 2.4.2",
-        status: "Novo",
-        observacoes: "Lead criado pelo teste da API"
-      };
+let leadId = null;
 
-      resultado.textContent = "Enviando...";
+const nome = document.getElementById("nome");
+const email = document.getElementById("email");
+const whatsapp = document.getElementById("whatsapp");
 
-      try {
+const btnCriar = document.getElementById("btnCriar");
+const btnAtendimento = document.getElementById("btnAtendimento");
 
-        const resposta = await fetch(API + "/leads", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(lead)
-        });
+const leadInfo = document.getElementById("leadInfo");
+const statusBox = document.getElementById("status");
+const resultado = document.getElementById("resultado");
 
-        const dados = await resposta.json();
 
-        resultado.textContent =
-          JSON.stringify(dados, null, 2);
+function mostrarResultado(data, sucesso = true) {
 
-      } catch (erro) {
+  statusBox.style.display = "block";
 
-        resultado.textContent =
-          "ERRO: " + erro.message;
+  statusBox.className =
+    sucesso
+      ? "status sucesso"
+      : "status erro";
 
+  resultado.textContent =
+    JSON.stringify(data, null, 2);
+}
+
+
+btnCriar.addEventListener("click", async () => {
+
+  if (!nome.value.trim()) {
+    alert("Informe o nome.");
+    return;
+  }
+
+  btnCriar.disabled = true;
+  btnCriar.textContent = "Criando Lead...";
+
+  try {
+
+    const resposta = await fetch(
+      API + "/leads",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          nome: nome.value.trim(),
+          email: email.value.trim(),
+          whatsapp: whatsapp.value.trim(),
+          origem: "Teste MGR CRM",
+          campanha: "Teste 2.4.3",
+          observacoes: "Teste do fluxo Lead para Atendimento"
+        })
       }
+    );
+
+    const data = await resposta.json();
+
+    if (!resposta.ok || data.success === false) {
+      throw new Error(
+        data.message || "Erro ao criar Lead."
+      );
     }
-  </script>
+
+    leadId = data.data?.id;
+
+    if (!leadId) {
+      throw new Error(
+        "Lead criado, mas a API não retornou o ID."
+      );
+    }
+
+    leadInfo.style.display = "block";
+
+    leadInfo.innerHTML =
+      "<strong>Lead criado com sucesso.</strong><br>" +
+      "ID: " + leadId + "<br>" +
+      "Nome: " + (data.data?.nome || nome.value);
+
+    btnAtendimento.style.display = "block";
+
+    mostrarResultado(data, true);
+
+  } catch (erro) {
+
+    mostrarResultado({
+      success: false,
+      message: erro.message
+    }, false);
+
+  } finally {
+
+    btnCriar.disabled = false;
+    btnCriar.textContent = "1. Criar Lead";
+  }
+
+});
+
+
+btnAtendimento.addEventListener("click", async () => {
+
+  if (!leadId) {
+    alert("Primeiro crie o Lead.");
+    return;
+  }
+
+  btnAtendimento.disabled = true;
+  btnAtendimento.textContent =
+    "Iniciando Atendimento...";
+
+  try {
+
+    const resposta = await fetch(
+      API + "/leads/" + leadId + "/iniciar-atendimento",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          tipo: "Diagnóstico MGR",
+          status_lead: "Em atendimento",
+          status_consultoria: "Em andamento"
+        })
+      }
+    );
+
+    const data = await resposta.json();
+
+    if (!resposta.ok || data.success === false) {
+      throw new Error(
+        data.message || "Erro ao iniciar atendimento."
+      );
+    }
+
+    mostrarResultado(data, true);
+
+  } catch (erro) {
+
+    mostrarResultado({
+      success: false,
+      message: erro.message
+    }, false);
+
+  } finally {
+
+    btnAtendimento.disabled = false;
+    btnAtendimento.textContent =
+      "2. Iniciar Atendimento";
+  }
+
+});
+
+</script>
 
 </body>
 </html>
