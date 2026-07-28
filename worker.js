@@ -26,16 +26,7 @@ async function router(request, env) {
   }
 
   const routes = [
- {
-    method: "PUT",
-    pattern: /^\/diagnosticos\/(\d+)$/,
-    handler: atualizarDiagnostico,
-},
-    {
-    method: "GET",
-    pattern: /^\/teste-diagnostico$/,
-    handler: testeDiagnostico,
-},
+
     {
     method: "GET",
     pattern: /^\/health$/,
@@ -122,6 +113,22 @@ async function router(request, env) {
     pattern: /^\/diagnosticos$/,
     handler: createDiagnostico,
 },
+     {
+    method: "PUT",
+    pattern: /^\/diagnosticos\/(\d+)$/,
+    handler: atualizarDiagnostico,
+},
+    {
+    method: "GET",
+    pattern: /^\/teste-diagnostico$/,
+    handler: testeDiagnostico,
+},
+    {
+    method: "GET",
+    pattern: /^\/teste-resultado-diagnostico$/,
+    handler: testeResultadoDiagnostico,
+},
+    
 
     // RESPOSTAS
     {
@@ -963,6 +970,217 @@ async function atualizarDiagnostico(request, env) {
             "Diagnóstico atualizado com sucesso"
         );
 
+    });
+
+}
+// ======================================================
+// TESTE RESULTADO DIAGNÓSTICO
+// ENTREGA 2.3.2
+// ======================================================
+
+async function testeResultadoDiagnostico(request, env) {
+
+    return new Response(`
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Resultado Diagnóstico MGR</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    max-width:900px;
+    margin:40px auto;
+    padding:20px;
+}
+
+h1{
+    margin-bottom:30px;
+}
+
+label{
+    display:block;
+    margin-top:14px;
+    font-weight:bold;
+}
+
+input, textarea{
+    width:100%;
+    box-sizing:border-box;
+    padding:10px;
+    margin-top:5px;
+    font-size:16px;
+}
+
+textarea{
+    min-height:80px;
+}
+
+button{
+    margin-top:25px;
+    padding:14px 25px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+pre{
+    background:#eee;
+    padding:20px;
+    margin-top:25px;
+    white-space:pre-wrap;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Resultado Diagnóstico MGR</h1>
+
+<label>Diagnóstico ID</label>
+<input id="id" type="number" value="1">
+
+<label>Score Geral</label>
+<input id="score_geral" type="number" value="75">
+
+<label>Score Renda</label>
+<input id="score_renda" type="number" value="80">
+
+<label>Score Reserva</label>
+<input id="score_reserva" type="number" value="60">
+
+<label>Score Patrimônio</label>
+<input id="score_patrimonio" type="number" value="70">
+
+<label>Score Família</label>
+<input id="score_familia" type="number" value="85">
+
+<label>Score Empresa</label>
+<input id="score_empresa" type="number" value="65">
+
+<label>Perfil Financeiro</label>
+<input id="perfil_financeiro" value="Em desenvolvimento">
+
+<label>Índice de Equilíbrio</label>
+<input id="indice_equilibrio" type="number" value="72">
+
+<label>Fortaleza</label>
+<textarea id="fortaleza">Boa capacidade de geração de renda.</textarea>
+
+<label>Vulnerabilidade</label>
+<textarea id="vulnerabilidade">Reserva financeira abaixo do ideal.</textarea>
+
+<label>Grau de Urgência</label>
+<input id="grau_urgencia" value="Moderado">
+
+<label>Parecer</label>
+<textarea id="parecer">Recomenda-se fortalecer a reserva e revisar a proteção financeira.</textarea>
+
+<button onclick="salvar()">
+Salvar Resultado
+</button>
+
+<pre id="resultado">Aguardando atualização...</pre>
+
+<script>
+
+async function salvar(){
+
+    const id =
+        document.getElementById("id").value;
+
+    const resultado =
+        document.getElementById("resultado");
+
+    resultado.textContent =
+        "Salvando resultado...";
+
+    try{
+
+        const resposta = await fetch(
+            "/diagnosticos/" + id,
+            {
+                method:"PUT",
+
+                headers:{
+                    "Content-Type":"application/json"
+                },
+
+                body:JSON.stringify({
+
+                    score_geral:
+                        Number(document.getElementById("score_geral").value),
+
+                    score_renda:
+                        Number(document.getElementById("score_renda").value),
+
+                    score_reserva:
+                        Number(document.getElementById("score_reserva").value),
+
+                    score_patrimonio:
+                        Number(document.getElementById("score_patrimonio").value),
+
+                    score_familia:
+                        Number(document.getElementById("score_familia").value),
+
+                    score_empresa:
+                        Number(document.getElementById("score_empresa").value),
+
+                    perfil_financeiro:
+                        document.getElementById("perfil_financeiro").value,
+
+                    indice_equilibrio:
+                        Number(document.getElementById("indice_equilibrio").value),
+
+                    fortaleza:
+                        document.getElementById("fortaleza").value,
+
+                    vulnerabilidade:
+                        document.getElementById("vulnerabilidade").value,
+
+                    grau_urgencia:
+                        document.getElementById("grau_urgencia").value,
+
+                    parecer:
+                        document.getElementById("parecer").value
+
+                })
+            }
+        );
+
+        const json = await resposta.json();
+
+        resultado.textContent =
+            JSON.stringify(json,null,2);
+
+    }
+    catch(erro){
+
+        resultado.textContent =
+            "Erro: " + erro.message;
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
+
+`,{
+        headers:{
+            ...CORS_HEADERS,
+            "Content-Type":"text/html; charset=UTF-8"
+        }
     });
 
 }
