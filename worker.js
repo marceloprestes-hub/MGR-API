@@ -58,6 +58,17 @@ async function router(request, env) {
       pattern: /^\/teste-respostas$/,
       handler: testeSalvarRespostas,
     },
+    // LEADS
+{
+  method: "GET",
+  pattern: /^\/leads$/,
+  handler: listarLeads,
+},
+{
+  method: "POST",
+  pattern: /^\/leads$/,
+  handler: criarLead,
+},
     
     // CLIENTES
    {
@@ -1435,4 +1446,86 @@ async function testeSalvarRespostas(request, env) {
 
     });
 
+}
+async function criarLead(request, env) {
+  return execute(async () => {
+    const body = await request.json();
+
+    const nome = String(body.nome || "").trim();
+    const email = String(body.email || "").trim();
+    const whatsapp = String(body.whatsapp || "").trim();
+    const origem = String(body.origem || "Manual").trim();
+    const campanha = String(body.campanha || "").trim();
+    const observacoes = String(body.observacoes || "").trim();
+
+    if (!nome) {
+      throw new Error("Nome do lead é obrigatório.");
+    }
+
+    if (!email) {
+      throw new Error("E-mail do lead é obrigatório.");
+    }
+
+    const uuid = crypto.randomUUID();
+
+    const result = await env.DB.prepare(`
+      INSERT INTO leads
+      (
+        uuid,
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        status,
+        observacoes
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+      .bind(
+        uuid,
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        "Novo",
+        observacoes
+      )
+      .run();
+
+    return ok({
+      id: result.meta.last_row_id,
+      uuid,
+      nome,
+      email,
+      whatsapp,
+      origem,
+      campanha,
+      status: "Novo"
+    });
+  });
+}
+
+async function listarLeads(request, env) {
+  return execute(async () => {
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        uuid,
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        status,
+        observacoes,
+        created_at,
+        updated_at
+      FROM leads
+      ORDER BY id DESC
+    `).all();
+
+    return ok(results);
+  });
 }
