@@ -1392,3 +1392,41 @@ async function listarRespostasDiagnostico(request, env) {
     });
 
 }
+async function testeSalvarRespostas(request, env) {
+
+    return execute(async () => {
+
+        const diagnosticoId = 1;
+
+        const respostas = [
+            { pergunta_id: 4, resposta: 5 },
+            { pergunta_id: 5, resposta: 4 },
+            { pergunta_id: 6, resposta: 5 }
+        ];
+
+        for (const item of respostas) {
+
+            const uuid = crypto.randomUUID();
+
+            await env.DB.prepare(`
+                INSERT INTO diagnostico_respostas
+                (uuid, diagnostico_id, pergunta_id, resposta)
+                VALUES (?, ?, ?, ?)
+            `)
+            .bind(
+                uuid,
+                diagnosticoId,
+                item.pergunta_id,
+                item.resposta
+            )
+            .run();
+        }
+
+        return ok({
+            diagnostico_id: diagnosticoId,
+            total_respostas: respostas.length
+        });
+
+    });
+
+}
