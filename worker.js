@@ -151,7 +151,11 @@ async function router(request, env) {
     pattern: /^\/diagnosticos\/(\d+)\/respostas$/,
     handler: listarRespostasDiagnostico,
 },
-
+{
+    method: "GET",
+    pattern: /^\/teste-salvar-respostas$/,
+    handler: testeSalvarRespostas,
+},
     // AGENDA
     {
       method: "GET",
