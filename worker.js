@@ -26,7 +26,12 @@ async function router(request, env) {
   }
 
   const routes = [
-   {
+  {
+    method: "GET",
+    pattern: /^\/teste-diagnostico$/,
+    handler: testeDiagnostico,
+},
+    {
     method: "GET",
     pattern: /^\/health$/,
     handler: health,
@@ -721,6 +726,163 @@ async function buscarDiagnostico(request, env){
         .first();
 
         return ok(resultado);
+
+    });
+
+}
+// ======================================================
+// TESTE DIAGNÓSTICO
+// ENTREGA 2.3.1
+// ======================================================
+
+async function testeDiagnostico(request, env) {
+
+    return new Response(`
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Teste Diagnóstico MGR</title>
+
+<style>
+
+body{
+    font-family:Arial,sans-serif;
+    max-width:850px;
+    margin:40px auto;
+    padding:20px;
+}
+
+h1{
+    margin-bottom:30px;
+}
+
+label{
+    display:block;
+    margin-top:15px;
+    font-weight:bold;
+}
+
+input{
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding:12px;
+    margin-top:6px;
+    font-size:16px;
+}
+
+button{
+    margin-top:20px;
+    padding:14px 24px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+pre{
+    background:#eeeeee;
+    padding:20px;
+    margin-top:25px;
+    white-space:pre-wrap;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Novo Diagnóstico MGR</h1>
+
+<label>Cliente ID</label>
+<input
+    id="cliente_id"
+    type="number"
+    value="1"
+>
+
+<label>Consultoria ID</label>
+<input
+    id="consultoria_id"
+    type="number"
+    value="1"
+>
+
+<button onclick="salvar()">
+    Criar Diagnóstico
+</button>
+
+<pre id="resultado">
+Aguardando cadastro...
+</pre>
+
+<script>
+
+async function salvar(){
+
+    const resultado =
+        document.getElementById("resultado");
+
+    resultado.textContent =
+        "Salvando diagnóstico...";
+
+    try{
+
+        const resposta = await fetch("/diagnosticos",{
+
+            method:"POST",
+
+            headers:{
+                "Content-Type":"application/json"
+            },
+
+            body:JSON.stringify({
+
+                cliente_id:Number(
+                    document.getElementById("cliente_id").value
+                ),
+
+                consultoria_id:Number(
+                    document.getElementById("consultoria_id").value
+                )
+
+            })
+
+        });
+
+        const json = await resposta.json();
+
+        resultado.textContent =
+            JSON.stringify(json,null,2);
+
+    }
+    catch(erro){
+
+        resultado.textContent =
+            "Erro ao cadastrar diagnóstico: "
+            + erro.message;
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>
+
+`,{
+
+        headers:{
+            ...CORS_HEADERS,
+            "Content-Type":"text/html; charset=UTF-8"
+        }
 
     });
 
