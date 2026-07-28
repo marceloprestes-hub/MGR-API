@@ -646,9 +646,9 @@ headers:{
 // DIAGNÓSTICOS
 // ======================================================
 
-async function createDiagnostico(request, env) {
+async function createDiagnostico(request, env){
 
-    return execute(async () => {
+    return execute(async()=>{
 
         const body = await readBody(request);
 
@@ -658,22 +658,25 @@ async function createDiagnostico(request, env) {
             INSERT INTO diagnosticos
             (
                 uuid,
-                consultoria_id,
-                status
+                cliente_id,
+                consultoria_id
             )
             VALUES
             (?, ?, ?)
         `)
         .bind(
             uuid,
-            body.consultoria_id,
-            body.status || "Em andamento"
+            body.cliente_id,
+            body.consultoria_id
         )
         .run();
 
-        return ok({
-            id: result.meta.last_row_id
-        }, "Diagnóstico criado com sucesso");
+        return ok(
+            {
+                id: result.meta.last_row_id
+            },
+            "Diagnóstico criado com sucesso"
+        );
 
     });
 
