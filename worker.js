@@ -69,7 +69,16 @@ async function router(request, env) {
   pattern: /^\/leads$/,
   handler: criarLead,
 },
-    
+    {
+  method: "GET",
+  pattern: /^\/leads\/(\d+)$/,
+  handler: buscarLead,
+},
+{
+  method: "POST",
+  pattern: /^\/leads\/(\d+)\/iniciar-atendimento$/,
+  handler: iniciarAtendimentoLead,
+},
     // CLIENTES
    {
     method: "GET",
@@ -1527,5 +1536,225 @@ async function listarLeads(request, env) {
     `).all();
 
     return ok(results);
+  });
+}
+// ======================================================
+// LEAD -> ATENDIMENTO -> CLIENTE -> CONSULTORIA
+// ENTREGA 2.4.3
+// ======================================================
+
+async function buscarLead(request, env) {
+  return execute(async () => {
+
+    const id = Number(request.params[0]);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return error("ID do lead inválido.", 400);
+    }
+
+    const lead = await env.DB.prepare(`
+      SELECT
+        id,
+        uuid,
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        status,
+        observacoes,
+        created_at,
+        updated_at
+      FROM leads
+      WHERE id = ?
+    `)
+    .bind(id)
+    .first();
+
+    if (!lead) {
+      return error("Lead não encontrado.", 404);
+    }
+
+    return ok(lead);
+
+  });
+}
+
+
+async function iniciarAtendimentoLead(request, env) {
+  return execute(async () => {
+
+    const leadId = Number(request.params[0]);
+
+    if (!Number.isInteger(leadId) || leadId <= 0) {
+      return error("ID do lead inválido.", 400);
+    }
+
+    const body = await readBody(request);
+
+    const lead = await env.DB.prepare(`
+      SELECT
+        id,
+        uuid,
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        status,
+        observacoes
+      FROM leads
+      WHERE id = ?
+    `)
+    .bind(leadId)
+    .first();
+
+    if (!lead) {
+      return error("Lead não encontrado.", 404);
+    }
+
+    let cliente = null;
+
+    if (lead.email) {
+
+      cliente = await env.DB.prepare(`
+        SELECT
+          id,
+          uuid,
+          nome,
+          email,
+          telefone
+        FROM clientes
+        WHERE lower(email) = lower(?)
+        ORDER BY id DESC
+        LIMIT 1
+      `)
+      .bind(lead.email)
+      .first();
+
+    }
+
+    if (!cliente) {
+
+      const clienteUuid = crypto.randomUUID();
+
+      const novoCliente = await env.DB.prepare(`
+        INSERT INTO clientes
+        (
+          uuid,
+          nome,
+          email,
+          telefone
+        )
+        VALUES (?, ?, ?, ?)
+      `)
+      .bind(
+        clienteUuid,
+        lead.nome || "",
+        lead.email || "",
+        lead.whatsapp || ""
+      )
+      .run();
+
+      cliente = {
+        id: novoCliente.meta.last_row_id,
+        uuid: clienteUuid,
+        nome: lead.nome || "",
+        email: lead.email || "",
+        telefone: lead.whatsapp || ""
+      };
+
+    }
+
+    const ultimo = await env.DB.prepare(`
+      SELECT MAX(numero_consultoria) AS numero
+      FROM consultorias
+    `)
+    .first();
+
+    const numeroConsultoria =
+      (ultimo?.numero || 1000) + 1;
+
+    const consultoriaUuid =
+      crypto.randomUUID();
+
+    const novaConsultoria = await env.DB.prepare(`
+      INSERT INTO consultorias
+      (
+        uuid,
+        cliente_id,
+        numero_consultoria,
+        data_consultoria,
+        tipo,
+        duracao,
+        consultor,
+        status,
+        observacoes
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `)
+    .bind(
+      consultoriaUuid,
+      cliente.id,
+      numeroConsultoria,
+      body.data_consultoria || new Date().toISOString(),
+      body.tipo || "Diagnóstico MGR",
+      Number(body.duracao || 60),
+      body.consultor || "Marcelo Prestes",
+      body.status_consultoria || "Em andamento",
+      body.observacoes ||
+        `Atendimento iniciado a partir do lead #${lead.id}. Origem: ${lead.origem || "Não informada"}.`
+    )
+    .run();
+
+    await env.DB.prepare(`
+      UPDATE leads
+      SET
+        status = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+    .bind(
+      body.status_lead || "Em atendimento",
+      leadId
+    )
+    .run();
+
+    return ok(
+      {
+
+        lead: {
+          id: lead.id,
+          uuid: lead.uuid,
+          nome: lead.nome,
+          email: lead.email,
+          whatsapp: lead.whatsapp,
+          status:
+            body.status_lead || "Em atendimento"
+        },
+
+        cliente: {
+          id: cliente.id,
+          uuid: cliente.uuid,
+          nome: cliente.nome,
+          email: cliente.email,
+          telefone: cliente.telefone
+        },
+
+        consultoria: {
+          id: novaConsultoria.meta.last_row_id,
+          uuid: consultoriaUuid,
+          numero_consultoria: numeroConsultoria,
+          cliente_id: cliente.id,
+          tipo:
+            body.tipo || "Diagnóstico MGR",
+          status:
+            body.status_consultoria || "Em andamento"
+        }
+
+      },
+      "Atendimento iniciado com sucesso"
+    );
+
   });
 }
