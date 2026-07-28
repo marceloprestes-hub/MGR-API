@@ -141,11 +141,16 @@ async function router(request, env) {
     
 
     // RESPOSTAS
-    {
-      method: "POST",
-      pattern: /^\/respostas$/,
-      handler: notImplemented,
-    },
+ {
+    method: "POST",
+    pattern: /^\/diagnosticos\/(\d+)\/respostas$/,
+    handler: salvarRespostasDiagnostico,
+},
+{
+    method: "GET",
+    pattern: /^\/diagnosticos\/(\d+)\/respostas$/,
+    handler: listarRespostasDiagnostico,
+},
 
     // AGENDA
     {
