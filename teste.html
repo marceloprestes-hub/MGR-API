@@ -145,7 +145,11 @@
     <button id="btnAtendimento">
       2. Iniciar Atendimento
     </button>
-
+    
+    <button id="btnDiagnostico" disabled>
+      3. Iniciar Diagnóstico
+    </button>
+    
     <div id="status" class="status">
       <pre id="resultado"></pre>
     </div>
@@ -299,7 +303,9 @@ btnAtendimento.addEventListener("click", async () => {
     }
 
     mostrarResultado(data, true);
-
+    
+    btnDiagnostico.disabled = false;
+    
   } catch (erro) {
 
     mostrarResultado({
@@ -315,7 +321,58 @@ btnAtendimento.addEventListener("click", async () => {
   }
 
 });
+  
+btnDiagnostico.addEventListener("click", async () => {
 
+  if (!consultoriaId) {
+    mostrarResultado({
+      success: false,
+      message: "Consultoria não encontrada."
+    }, false);
+    return;
+  }
+
+  btnDiagnostico.disabled = true;
+  btnDiagnostico.textContent = "Iniciando diagnóstico...";
+
+  try {
+
+    const resposta = await fetch(
+      API + "/consultorias/" + consultoriaId + "/iniciar-diagnostico",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    const data = await resposta.json();
+
+    if (!resposta.ok || data.success === false) {
+      throw new Error(
+        data.message || "Erro ao iniciar diagnóstico."
+      );
+    }
+
+    mostrarResultado(data, true);
+
+  } catch (erro) {
+
+    mostrarResultado({
+      success: false,
+      message: erro.message
+    }, false);
+
+  } finally {
+
+    btnDiagnostico.disabled = false;
+    btnDiagnostico.textContent =
+      "3. Iniciar Diagnóstico";
+  }
+
+});
+  
 </script>
 
 </body>
