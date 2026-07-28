@@ -122,7 +122,11 @@ async function router(request, env) {
   pattern: /^\/consultorias$/,
   handler: createConsultoria,
 },
-
+{
+  method: "POST",
+  pattern: /^\/consultorias\/(\d+)\/iniciar-diagnostico$/,
+  handler: iniciarDiagnosticoConsultoria,
+},
     // DIAGNÓSTICOS
 {
     method: "GET",
@@ -1754,6 +1758,121 @@ async function iniciarAtendimentoLead(request, env) {
 
       },
       "Atendimento iniciado com sucesso"
+    );
+
+  });
+}
+
+// ======================================================
+// CONSULTORIA -> DIAGNÓSTICO
+// ENTREGA 2.4.4
+// ======================================================
+
+async function iniciarDiagnosticoConsultoria(request, env) {
+  return execute(async () => {
+
+    const consultoriaId = Number(request.params[0]);
+
+    if (!Number.isInteger(consultoriaId) || consultoriaId <= 0) {
+      return error("ID da consultoria inválido.", 400);
+    }
+
+    const consultoria = await env.DB.prepare(`
+      SELECT
+        c.id,
+        c.uuid,
+        c.cliente_id,
+        c.numero_consultoria,
+        c.tipo,
+        c.status,
+        cli.nome AS cliente_nome,
+        cli.email AS cliente_email,
+        cli.telefone AS cliente_telefone
+      FROM consultorias c
+      INNER JOIN clientes cli
+        ON cli.id = c.cliente_id
+      WHERE c.id = ?
+    `)
+    .bind(consultoriaId)
+    .first();
+
+    if (!consultoria) {
+      return error("Consultoria não encontrada.", 404);
+    }
+
+    let diagnostico = await env.DB.prepare(`
+      SELECT *
+      FROM diagnosticos
+      WHERE consultoria_id = ?
+      ORDER BY id DESC
+      LIMIT 1
+    `)
+    .bind(consultoriaId)
+    .first();
+
+    let criado = false;
+
+    if (!diagnostico) {
+
+      const diagnosticoUuid = crypto.randomUUID();
+
+      const novoDiagnostico = await env.DB.prepare(`
+        INSERT INTO diagnosticos
+        (
+          uuid,
+          cliente_id,
+          consultoria_id
+        )
+        VALUES (?, ?, ?)
+      `)
+      .bind(
+        diagnosticoUuid,
+        consultoria.cliente_id,
+        consultoria.id
+      )
+      .run();
+
+      diagnostico = await env.DB.prepare(`
+        SELECT *
+        FROM diagnosticos
+        WHERE id = ?
+      `)
+      .bind(novoDiagnostico.meta.last_row_id)
+      .first();
+
+      criado = true;
+    }
+
+    return ok(
+      {
+        cliente: {
+          id: consultoria.cliente_id,
+          nome: consultoria.cliente_nome,
+          email: consultoria.cliente_email,
+          telefone: consultoria.cliente_telefone
+        },
+
+        consultoria: {
+          id: consultoria.id,
+          uuid: consultoria.uuid,
+          numero_consultoria: consultoria.numero_consultoria,
+          tipo: consultoria.tipo,
+          status: consultoria.status
+        },
+
+        diagnostico: {
+          id: diagnostico.id,
+          uuid: diagnostico.uuid,
+          cliente_id: diagnostico.cliente_id,
+          consultoria_id: diagnostico.consultoria_id
+        },
+
+        diagnostico_criado: criado
+      },
+
+      criado
+        ? "Diagnóstico iniciado com sucesso"
+        : "Diagnóstico já existente para esta consultoria"
     );
 
   });
