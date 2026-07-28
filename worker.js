@@ -26,7 +26,12 @@ async function router(request, env) {
   }
 
   const routes = [
-  {
+ {
+    method: "PUT",
+    pattern: /^\/diagnosticos\/(\d+)$/,
+    handler: atualizarDiagnostico,
+},
+    {
     method: "GET",
     pattern: /^\/teste-diagnostico$/,
     handler: testeDiagnostico,
@@ -883,6 +888,80 @@ async function salvar(){
             ...CORS_HEADERS,
             "Content-Type":"text/html; charset=UTF-8"
         }
+
+    });
+
+}
+// ======================================================
+// ATUALIZAR DIAGNÓSTICO
+// ENTREGA 2.3.2
+// ======================================================
+
+async function atualizarDiagnostico(request, env) {
+
+    return execute(async () => {
+
+        const id = request.params[0];
+        const body = await readBody(request);
+
+        const diagnostico = await env.DB.prepare(`
+            SELECT id
+            FROM diagnosticos
+            WHERE id = ?
+        `)
+        .bind(id)
+        .first();
+
+        if (!diagnostico) {
+            return error("Diagnóstico não encontrado.", 404);
+        }
+
+        await env.DB.prepare(`
+            UPDATE diagnosticos
+            SET
+                score_geral = ?,
+                score_renda = ?,
+                score_reserva = ?,
+                score_patrimonio = ?,
+                score_familia = ?,
+                score_empresa = ?,
+                perfil_financeiro = ?,
+                indice_equilibrio = ?,
+                fortaleza = ?,
+                vulnerabilidade = ?,
+                grau_urgencia = ?,
+                parecer = ?
+            WHERE id = ?
+        `)
+        .bind(
+            Number(body.score_geral || 0),
+            Number(body.score_renda || 0),
+            Number(body.score_reserva || 0),
+            Number(body.score_patrimonio || 0),
+            Number(body.score_familia || 0),
+            Number(body.score_empresa || 0),
+            body.perfil_financeiro || "",
+            Number(body.indice_equilibrio || 0),
+            body.fortaleza || "",
+            body.vulnerabilidade || "",
+            body.grau_urgencia || "",
+            body.parecer || "",
+            id
+        )
+        .run();
+
+        const atualizado = await env.DB.prepare(`
+            SELECT *
+            FROM diagnosticos
+            WHERE id = ?
+        `)
+        .bind(id)
+        .first();
+
+        return ok(
+            atualizado,
+            "Diagnóstico atualizado com sucesso"
+        );
 
     });
 
