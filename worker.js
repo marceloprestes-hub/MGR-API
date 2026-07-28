@@ -110,8 +110,8 @@ async function router(request, env) {
 },
 {
     method: "GET",
-    pattern: /^\/diagnosticos\/(\d+)$/,
-    handler: buscarDiagnostico,
+    pattern: /^\/clientes\/(\d+)\/diagnosticos$/,
+    handler: listarDiagnosticosCliente,
 },
 {
     method: "POST",
@@ -1215,6 +1215,49 @@ async function buscarDiagnostico(request, env) {
         }
 
         return ok(diagnostico);
+
+    });
+
+}
+async function listarDiagnosticosCliente(request, env) {
+
+    return execute(async () => {
+
+        const clienteId = request.params[0];
+
+        const { results } = await env.DB.prepare(`
+            SELECT
+                d.id,
+                d.uuid,
+                d.cliente_id,
+                d.consultoria_id,
+                d.score_geral,
+                d.score_renda,
+                d.score_reserva,
+                d.score_patrimonio,
+                d.score_familia,
+                d.score_empresa,
+                d.perfil_financeiro,
+                d.indice_equilibrio,
+                d.fortaleza,
+                d.vulnerabilidade,
+                d.grau_urgencia,
+                d.parecer,
+                d.created_at,
+                c.nome AS cliente_nome,
+                co.numero_consultoria
+            FROM diagnosticos d
+            INNER JOIN clientes c
+                ON c.id = d.cliente_id
+            INNER JOIN consultorias co
+                ON co.id = d.consultoria_id
+            WHERE d.cliente_id = ?
+            ORDER BY d.id DESC
+        `)
+        .bind(clienteId)
+        .all();
+
+        return ok(results);
 
     });
 
