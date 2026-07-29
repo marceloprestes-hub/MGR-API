@@ -74,6 +74,16 @@ async function router(request, env) {
   pattern: /^\/leads\/(\d+)$/,
   handler: buscarLead,
 },
+    {
+  method: "PUT",
+  pattern: /^\/leads\/(\d+)$/,
+  handler: atualizarLead,
+},
+{
+  method: "DELETE",
+  pattern: /^\/leads\/(\d+)$/,
+  handler: excluirLead,
+},
 {
   method: "POST",
   pattern: /^\/leads\/(\d+)\/iniciar-atendimento$/,
@@ -1588,6 +1598,105 @@ async function buscarLead(request, env) {
   });
 }
 
+async function atualizarLead(request, env) {
+  return execute(async () => {
+    const id = Number(request.params[0]);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return error("ID do lead inválido.", 400);
+    }
+
+    const body = await request.json();
+
+    const nome = String(body.nome || "").trim();
+    const email = String(body.email || "").trim();
+    const whatsapp = String(body.whatsapp || "").trim();
+    const origem = String(body.origem || "").trim();
+    const campanha = String(body.campanha || "").trim();
+    const status = String(body.status || "Novo").trim();
+    const observacoes = String(body.observacoes || "").trim();
+
+    if (!nome) {
+      return error("Nome do lead é obrigatório.", 400);
+    }
+
+    const lead = await env.DB.prepare(`
+      SELECT id FROM leads WHERE id = ?
+    `)
+      .bind(id)
+      .first();
+
+    if (!lead) {
+      return error("Lead não encontrado.", 404);
+    }
+
+    await env.DB.prepare(`
+      UPDATE leads
+      SET nome = ?,
+          email = ?,
+          whatsapp = ?,
+          origem = ?,
+          campanha = ?,
+          status = ?,
+          observacoes = ?,
+          updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `)
+      .bind(
+        nome,
+        email,
+        whatsapp,
+        origem,
+        campanha,
+        status,
+        observacoes,
+        id
+      )
+      .run();
+
+    return ok({
+      id,
+      nome,
+      email,
+      whatsapp,
+      origem,
+      campanha,
+      status,
+      observacoes
+    });
+  });
+}
+
+async function excluirLead(request, env) {
+  return execute(async () => {
+    const id = Number(request.params[0]);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return error("ID do lead inválido.", 400);
+    }
+
+    const lead = await env.DB.prepare(`
+      SELECT id FROM leads WHERE id = ?
+    `)
+      .bind(id)
+      .first();
+
+    if (!lead) {
+      return error("Lead não encontrado.", 404);
+    }
+
+    await env.DB.prepare(`
+      DELETE FROM leads WHERE id = ?
+    `)
+      .bind(id)
+      .run();
+
+    return ok({
+      id,
+      excluido: true
+    });
+  });
+}
 
 async function iniciarAtendimentoLead(request, env) {
   return execute(async () => {
