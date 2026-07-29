@@ -168,7 +168,11 @@ async function router(request, env) {
     pattern: /^\/teste-resultado-diagnostico$/,
     handler: testeResultadoDiagnostico,
 },
-    
+   {
+    method: "POST",
+    pattern: /^\/diagnosticos\/(\d+)\/resposta$/,
+    handler: registrarRespostaDiagnostico,
+}, 
 
     // RESPOSTAS
  {
@@ -1876,4 +1880,86 @@ async function iniciarDiagnosticoConsultoria(request, env) {
     );
 
   });
+}
+async function registrarRespostaDiagnostico(request, env) {
+
+    const diagnosticoId = request.params[0];
+
+    const body = await request.json();
+
+    const {
+        pergunta,
+        pilar,
+        resposta,
+        pontuacao
+    } = body;
+
+    // Verifica se o diagnóstico existe
+    const diagnostico = await env.DB.prepare(`
+        SELECT id
+        FROM diagnosticos
+        WHERE id = ?
+    `)
+    .bind(diagnosticoId)
+    .first();
+
+    if (!diagnostico) {
+        return json({
+            success: false,
+            message: "Diagnóstico não encontrado."
+        }, 404);
+    }
+
+    // Grava na tabela técnica
+    await env.DB.prepare(`
+        INSERT INTO diagnostico_respostas
+        (
+            uuid,
+            diagnostico_id,
+            pergunta_id,
+            resposta
+        )
+        VALUES (?, ?, ?, ?)
+    `)
+    .bind(
+        crypto.randomUUID(),
+        diagnosticoId,
+        pergunta,
+        resposta
+    )
+    .run();
+
+    // Grava na tabela analítica
+    await env.DB.prepare(`
+        INSERT INTO respostas
+        (
+            diagnostico_id,
+            pergunta,
+            pilar,
+            resposta,
+            pontuacao
+        )
+        VALUES (?, ?, ?, ?, ?)
+    `)
+    .bind(
+        diagnosticoId,
+        pergunta,
+        pilar,
+        resposta,
+        pontuacao
+    )
+    .run();
+
+    return json({
+        success: true,
+        message: "Resposta registrada com sucesso.",
+        data: {
+            diagnostico_id: Number(diagnosticoId),
+            pergunta,
+            pilar,
+            resposta,
+            pontuacao
+        }
+    });
+
 }
