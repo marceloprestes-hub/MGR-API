@@ -1615,7 +1615,9 @@ async function atualizarLead(request, env) {
     const campanha = String(body.campanha || "").trim();
     const status = String(body.status || "Novo").trim();
     const observacoes = String(body.observacoes || "").trim();
-
+    const empresa = String(body.empresa || "").trim();
+    const cargo = String(body.cargo || "").trim();
+    const consultor = String(body.consultor || "").trim();
     if (!nome) {
       return error("Nome do lead é obrigatório.", 400);
     }
@@ -1639,6 +1641,9 @@ async function atualizarLead(request, env) {
           campanha = ?,
           status = ?,
           observacoes = ?,
+          empresa = ?,
+          cargo = ?,
+          consultor = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `)
@@ -1650,20 +1655,26 @@ async function atualizarLead(request, env) {
         campanha,
         status,
         observacoes,
+        empresa,
+        cargo,
+        consultor,
         id
       )
       .run();
 
-    return ok({
-      id,
-      nome,
-      email,
-      whatsapp,
-      origem,
-      campanha,
-      status,
-      observacoes
-    });
+  return ok({
+  id,
+  nome,
+  email,
+  whatsapp,
+  origem,
+  campanha,
+  status,
+  observacoes,
+  empresa,
+  cargo,
+  consultor
+});
   });
 }
 
