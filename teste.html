@@ -147,9 +147,12 @@
     </button>
     
     <button id="btnDiagnostico" disabled>
-      3. Iniciar Diagnóstico
+      3. Iniciar Diagnóstico    
     </button>
     
+    <button id="btnResposta">
+    4. Registrar Resposta
+    </button>
     <div id="status" class="status">
       <pre id="resultado"></pre>
     </div>
@@ -169,6 +172,8 @@ const whatsapp = document.getElementById("whatsapp");
 
 const btnCriar = document.getElementById("btnCriar");
 const btnAtendimento = document.getElementById("btnAtendimento");
+  const btnDiagnostico = document.getElementById("btnDiagnostico");
+const btnResposta = document.getElementById("btnResposta");
 
 const leadInfo = document.getElementById("leadInfo");
 const statusBox = document.getElementById("status");
@@ -378,7 +383,41 @@ btnDiagnostico.addEventListener("click", async () => {
   }
 
 });
-  
+  btnResposta.addEventListener("click", registrarResposta);
+async function registrarResposta() {
+
+    try {
+
+        const resposta = await fetch(
+            API + "/diagnosticos/1/resposta",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    pergunta: 1,
+                    pilar: "Máquina de Gerar Renda",
+                    resposta: 4,
+                    pontuacao: 4
+                })
+            }
+        );
+
+        const dados = await resposta.json();
+
+        mostrarResultado(dados, resposta.ok);
+
+    } catch (erro) {
+
+        mostrarResultado({
+            success: false,
+            message: erro.message
+        }, false);
+
+    }
+
+}
 </script>
 
 </body>
