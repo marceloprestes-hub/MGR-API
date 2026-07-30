@@ -1550,6 +1550,7 @@ async function listarLeads(request, env) {
         empresa,
         cargo,
         consultor,
+        cidade,
         created_at,
         updated_at
       FROM leads
@@ -1587,6 +1588,7 @@ async function buscarLead(request, env) {
         empresa,
         cargo,
         consultor,
+        cidade,
         created_at,
         updated_at
       FROM leads
