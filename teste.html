@@ -165,7 +165,36 @@
 const API = "https://mgr-api.marceloprestes-economista.workers.dev";
 
 let leadId = null;
+async function testarPUT() {
+  const resposta = await fetch(API + "/leads/27", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      nome: "DezelWhashinton",
+      email: "denzel@gmail.com",
+      whatsapp: "34333333333",
+      origem: "Landing Page MGR",
+      campanha: "CRM MGR",
+      status: "Novo",
+      observacoes: "CTA:diagnostico",
+      empresa: "EMPRESA ALTERADA PELO PUT",
+      cargo: "CARGO ALTERADO PELO PUT",
+      consultor: "MARCELO PUT"
+    })
+  });
 
+  const data = await resposta.json();
+
+  console.log("STATUS:", resposta.status);
+  console.log("RESPOSTA PUT:", data);
+
+  alert(JSON.stringify(data, null, 2));
+}
+
+testarPUT();
+  
 const nome = document.getElementById("nome");
 const email = document.getElementById("email");
 const whatsapp = document.getElementById("whatsapp");
