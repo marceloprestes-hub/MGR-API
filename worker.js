@@ -1581,6 +1581,9 @@ async function buscarLead(request, env) {
         campanha,
         status,
         observacoes,
+        empresa,
+        cargo,
+        consultor,
         created_at,
         updated_at
       FROM leads
@@ -1597,7 +1600,6 @@ async function buscarLead(request, env) {
 
   });
 }
-
 async function atualizarLead(request, env) {
   return execute(async () => {
     const id = Number(request.params[0]);
