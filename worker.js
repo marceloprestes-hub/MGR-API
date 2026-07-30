@@ -1547,6 +1547,9 @@ async function listarLeads(request, env) {
         campanha,
         status,
         observacoes,
+        empresa,
+        cargo,
+        consultor,
         created_at,
         updated_at
       FROM leads
