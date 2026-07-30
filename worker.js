@@ -1623,6 +1623,7 @@ async function atualizarLead(request, env) {
     const empresa = String(body.empresa || "").trim();
     const cargo = String(body.cargo || "").trim();
     const consultor = String(body.consultor || "").trim();
+    const cidade = String(body.cidade || "").trim();
     if (!nome) {
       return error("Nome do lead é obrigatório.", 400);
     }
@@ -1649,6 +1650,7 @@ async function atualizarLead(request, env) {
           empresa = ?,
           cargo = ?,
           consultor = ?,
+          cidade = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `)
@@ -1663,6 +1665,7 @@ async function atualizarLead(request, env) {
         empresa,
         cargo,
         consultor,
+        cidade,
         id
       )
       .run();
