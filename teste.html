@@ -399,6 +399,10 @@ consultoriaId = 15;
     }
 
     mostrarResultado(data, true);
+    if (data.data && data.data.diagnostico && data.data.diagnostico.id) {
+  diagnosticoId = data.data.diagnostico.id;
+  btnResposta.disabled = false;
+}
 
   } catch (erro) {
 
