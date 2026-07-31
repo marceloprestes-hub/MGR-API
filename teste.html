@@ -165,6 +165,8 @@
 const API = "https://mgr-api.marceloprestes-economista.workers.dev";
 
 let leadId = null;
+  let consultoriaId = null;
+let diagnosticoId = null;
 async function testarPUT() {
   const resposta = await fetch(API + "/leads/27", {
     method: "PUT",
