@@ -516,13 +516,12 @@ async function registrarResposta() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    pergunta: numeroPerguntaTeste,
-                    pilar: "Máquina de Gerar Renda",
-                    resposta: 4,
-                    pontuacao: 4
-                })
+               body: JSON.stringify({
+               pergunta: perguntasMGR[numeroPerguntaTeste - 1].numero,
+               pilar: perguntasMGR[numeroPerguntaTeste - 1].pilar,
+               resposta: 4,
+               pontuacao: 4
+            })
             }
         );
 
