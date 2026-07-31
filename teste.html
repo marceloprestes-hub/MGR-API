@@ -421,7 +421,7 @@ async function registrarResposta() {
     try {
 
         const resposta = await fetch(
-            API + "/diagnosticos/1/resposta",
+            API + "/diagnosticos/" + diagnosticoId + "/resposta",
             {
                 method: "POST",
                 headers: {
