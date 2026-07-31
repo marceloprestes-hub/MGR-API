@@ -420,6 +420,83 @@ btnDiagnostico.addEventListener("click", async () => {
 });
   btnResposta.addEventListener("click", registrarResposta);
 let numeroPerguntaTeste = 1;
+  const perguntasMGR = [
+  {
+    numero: 1,
+    pilar: "Máquina de Gerar Renda",
+    pergunta: "Se sua renda parasse hoje, por quanto tempo você conseguiria manter seu padrão de vida sem depender de terceiros?"
+  },
+  {
+    numero: 2,
+    pilar: "Máquina de Gerar Renda",
+    pergunta: "Sua renda está protegida caso uma doença ou acidente impeça você de trabalhar?"
+  },
+  {
+    numero: 3,
+    pilar: "Máquina de Gerar Renda",
+    pergunta: "Se você não pudesse mais gerar renda, sua família conseguiria manter o padrão de vida atual?"
+  },
+  {
+    numero: 4,
+    pilar: "Proteção da Família",
+    pergunta: "Se você faltasse hoje, sua família teria recursos suficientes para manter o padrão de vida?"
+  },
+  {
+    numero: 5,
+    pilar: "Proteção da Família",
+    pergunta: "Você sabe exatamente quanto sua família precisaria para reorganizar a vida financeira na sua ausência?"
+  },
+  {
+    numero: 6,
+    pilar: "Proteção da Família",
+    pergunta: "As pessoas que dependem financeiramente de você estariam protegidas das dívidas e compromissos que permaneceriam?"
+  },
+  {
+    numero: 7,
+    pilar: "Proteção da Saúde",
+    pergunta: "Uma doença grave hoje poderia comprometer significativamente seu patrimônio ou suas reservas?"
+  },
+  {
+    numero: 8,
+    pilar: "Proteção da Saúde",
+    pergunta: "Você possui recursos ou proteção financeira para enfrentar um tratamento de saúde prolongado sem comprometer seus objetivos?"
+  },
+  {
+    numero: 9,
+    pilar: "Proteção da Saúde",
+    pergunta: "Se precisasse se afastar do trabalho para cuidar da saúde, estaria financeiramente preparado?"
+  },
+  {
+    numero: 10,
+    pilar: "Construção de Reservas",
+    pergunta: "Você possui uma reserva financeira suficiente para enfrentar imprevistos sem recorrer a empréstimos ou vender patrimônio?"
+  },
+  {
+    numero: 11,
+    pilar: "Construção de Reservas",
+    pergunta: "Você consegue investir regularmente uma parte da sua renda para seus objetivos futuros?"
+  },
+  {
+    numero: 12,
+    pilar: "Construção de Reservas",
+    pergunta: "Hoje você sabe quanto deveria acumular para conquistar independência financeira?"
+  },
+  {
+    numero: 13,
+    pilar: "Longevidade Financeira",
+    pergunta: "Você sabe qual renda mensal precisará ter quando decidir reduzir ou encerrar sua atividade profissional?"
+  },
+  {
+    numero: 14,
+    pilar: "Longevidade Financeira",
+    pergunta: "Mantendo sua estratégia atual, você acredita que conseguirá preservar seu padrão de vida durante toda a aposentadoria?"
+  },
+  {
+    numero: 15,
+    pilar: "Longevidade Financeira",
+    pergunta: "Se viver mais do que imagina, seu patrimônio e suas reservas serão suficientes para sustentar você com independência?"
+  }
+];
 
 async function registrarResposta() {
 
