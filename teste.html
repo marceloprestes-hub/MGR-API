@@ -419,7 +419,17 @@ btnDiagnostico.addEventListener("click", async () => {
 
 });
   btnResposta.addEventListener("click", registrarResposta);
+let numeroPerguntaTeste = 1;
+
 async function registrarResposta() {
+
+    if (!diagnosticoId) {
+        mostrarResultado({
+            success: false,
+            message: "Inicie o diagnóstico antes de registrar respostas."
+        }, false);
+        return;
+    }
 
     try {
 
@@ -431,7 +441,7 @@ async function registrarResposta() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    pergunta: 1,
+                    pergunta: numeroPerguntaTeste,
                     pilar: "Máquina de Gerar Renda",
                     resposta: 4,
                     pontuacao: 4
@@ -441,7 +451,21 @@ async function registrarResposta() {
 
         const dados = await resposta.json();
 
-        mostrarResultado(dados, resposta.ok);
+        if (!resposta.ok || dados.success === false) {
+            throw new Error(
+                dados.message || "Erro ao registrar resposta."
+            );
+        }
+
+        mostrarResultado({
+            ...dados,
+            teste: {
+                diagnostico_id: diagnosticoId,
+                pergunta_registrada: numeroPerguntaTeste
+            }
+        }, true);
+
+        numeroPerguntaTeste++;
 
     } catch (erro) {
 
