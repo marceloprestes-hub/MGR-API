@@ -283,8 +283,10 @@ alert("CHEGOU NO BOTÃO 2");
     btnAtendimento.style.display = "block";
 
     mostrarResultado(data, true);
-    diagnosticoId = data.data.diagnostico.id;
+    consultoriaId = data.data.consultoria.id;
 
+btnDiagnostico.disabled = false;
+btnDiagnostico.style.display = "block";
   } catch (erro) {
 
     mostrarResultado({
